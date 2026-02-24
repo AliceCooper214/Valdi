@@ -12,9 +12,8 @@
 
 namespace Valdi {
 
-ProtobufMessageFactory::ProtobufMessageFactory(bool skipProtoIndex)
-    : _descriptorDatabase(std::make_unique<Protobuf::DescriptorDatabase>(skipProtoIndex)),
-      _pool(_descriptorDatabase.get()) {
+ProtobufMessageFactory::ProtobufMessageFactory()
+    : _descriptorDatabase(std::make_unique<Protobuf::DescriptorDatabase>()), _pool(_descriptorDatabase.get()) {
     _pool.InternalSetLazilyBuildDependencies();
 }
 ProtobufMessageFactory::~ProtobufMessageFactory() = default;

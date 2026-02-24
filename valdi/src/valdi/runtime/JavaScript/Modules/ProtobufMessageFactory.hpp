@@ -26,7 +26,7 @@ class DescriptorDatabase;
 
 class ProtobufMessageFactory : public ValdiObject {
 public:
-    explicit ProtobufMessageFactory(bool skipProtoIndex);
+    ProtobufMessageFactory();
     ~ProtobufMessageFactory() override;
 
     struct NamespaceEntry {

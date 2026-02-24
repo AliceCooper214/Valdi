@@ -100,10 +100,6 @@ bool ValdiRuntimeTweaks::disableAnimationRemoveOnCompleteIos() const {
     return getConfigKey("VALDI_DISABLE_ANIMATION_REMOVE_ON_COMPLETE_IOS");
 }
 
-bool ValdiRuntimeTweaks::skipProtoIndex() const {
-    return getConfigKey("VALDI_PROTO_SKIP_INDEX");
-}
-
 bool ValdiRuntimeTweaks::enableScopedContextStackTraceCapture() const {
     static const StringBox kKey =
         StringCache::getGlobal().makeStringFromLiteral("VALDI_ENABLE_SCOPED_CONTEXT_STACK_TRACE_CAPTURE");

@@ -30,7 +30,6 @@ public:
     bool disableAnimationRemoveOnCompleteIos() const;
     bool shouldNudgeJSThread() const;
     bool disablePersistentStoreEncryption() const;
-    bool skipProtoIndex() const;
     bool enableScopedContextStackTraceCapture() const;
     bool disableJsLogging() const;
 

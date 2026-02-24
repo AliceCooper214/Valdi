@@ -1055,10 +1055,9 @@ Ref<ProtobufMessageFactory> ProtobufModule::getMessageFactoryAtPath(ResourceMana
 
     auto messageFactory = castOrNull<ProtobufMessageFactory>(entry.processed);
     if (messageFactory == nullptr) {
-        bool skipProtoIndex = resourceManager.getRuntimeTweaks()->skipProtoIndex();
         VALDI_TRACE("Protobuf.initializeMessageFactory");
         // Step 1: We parse the protobuf definitions and load them inside a message factory
-        messageFactory = Valdi::makeShared<ProtobufMessageFactory>(skipProtoIndex);
+        messageFactory = Valdi::makeShared<ProtobufMessageFactory>();
         messageFactory->load(entry.raw, exceptionTracker);
         if (!exceptionTracker) {
             return nullptr;
@@ -1088,8 +1087,7 @@ JSValueRef ProtobufModule::loadMessagesFromProtoFileContent(JSFunctionNativeCall
         auto protoFileContent = callContext.getParameterAsStaticString(1);
         CHECK_CALL_CONTEXT(callContext);
         auto utf8Storage = protoFileContent->utf8Storage();
-        bool skipProtoIndex = _resourcesManager.getRuntimeTweaks()->skipProtoIndex();
-        auto messageFactory = Valdi::makeShared<ProtobufMessageFactory>(skipProtoIndex);
+        auto messageFactory = Valdi::makeShared<ProtobufMessageFactory>();
 
         if (!messageFactory->parseAndLoad(filename, utf8Storage.toStringView(), callContext.getExceptionTracker())) {
             return JSValueRef();
