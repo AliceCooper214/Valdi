@@ -88,11 +88,6 @@
     return [[SCValdiJSWorker alloc] initWithWorkerRuntime:_jsRuntime nativeObjectsManager:nativeObjectsManager];
 }
 
-- (id<SCValdiJSRuntime>)createScopedJSRuntime
-{
-    return [self createScopedJSRuntimeWithScopeName:@""];
-}
-
 - (void)dispose
 {
     NSAssert(_nativeObjectsManager, @"Cannot dispose a scoped JSRuntime that was not created with createScopedJSRuntime");

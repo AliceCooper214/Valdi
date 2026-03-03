@@ -39,11 +39,17 @@ generated code to call functions defined in your Valdi modules.
 
 /**
  * Create a new scoped JSRuntime.
+ *
  * The scoped JSRuntime will have its own native objects manager, which will cause all native
  * references emitted during interactions with the scoped JSRuntime to be disposed when
  * the scoped JSRuntime itself is disposed. You can use createScopedJSRuntime when you have a
- * bounded task and want to eagerly dipose native references when the task is done, rather than
+ * bounded task and want to eagerly dispose native references when the task is done, rather than
  * wait until the JS engine garbage collects them.
+ *
+ * On iOS, ARC deallocates objects deterministically so the risk of cross-language retain cycles
+ * is lower than on Android. However, scoped runtimes can still be useful when you want
+ * deterministic cleanup of native references at a well-defined point rather than relying on
+ * the JS garbage collector.
  *
  * @param scopeName A descriptive name identifying where this scoped runtime is created from.
  *                  This name appears in error messages to help debug issues with disposed
@@ -51,12 +57,6 @@ generated code to call functions defined in your Valdi modules.
  *                  or feature name) to make error messages actionable.
  */
 - (id<SCValdiJSRuntime>)createScopedJSRuntimeWithScopeName:(NSString*)scopeName;
-
-/**
- * Create a new scoped JSRuntime with an empty scope name.
- * Prefer using createScopedJSRuntimeWithScopeName: to provide debugging context.
- */
-- (id<SCValdiJSRuntime>)createScopedJSRuntime;
 
 /**
  * Destroy the JSRuntime. This is only legal to call on a JSRuntime instance returned from createScopedJSRuntime.
