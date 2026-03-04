@@ -473,7 +473,8 @@ def setup_dependencies(workspace_root = None):
     http_archive(
         name = "libwebp",
         build_file = "@skia//bazel/external/libwebp:BUILD.bazel",
-        url = "https://chromium.googlesource.com/webm/libwebp.git/+archive/845d5476a866141ba35ac133f856fa62f0b7445f.tar.gz",
+        url = "https://github.com/webmproject/libwebp/archive/845d5476a866141ba35ac133f856fa62f0b7445f.tar.gz",
+        strip_prefix = "libwebp-845d5476a866141ba35ac133f856fa62f0b7445f",
     )
 
     http_archive(
@@ -489,13 +490,15 @@ def setup_dependencies(workspace_root = None):
     http_archive(
         name = "freetype",
         build_file = "@skia//bazel/external/freetype:BUILD.bazel",
-        url = "https://chromium.googlesource.com/chromium/src/third_party/freetype2.git/+archive/5d4e649f740c675426fbe4cdaffc53ee2a4cb954.tar.gz",
+        url = "https://github.com/freetype/freetype/archive/5d4e649f740c675426fbe4cdaffc53ee2a4cb954.tar.gz",
+        strip_prefix = "freetype-5d4e649f740c675426fbe4cdaffc53ee2a4cb954",
     )
 
     http_archive(
         name = "expat",
         build_file = "@skia//bazel/external/expat:BUILD.bazel",
-        url = "https://chromium.googlesource.com/external/github.com/libexpat/libexpat.git/+archive/624da0f593bb8d7e146b9f42b06d8e6c80d032a3.tar.gz",
+        url = "https://github.com/libexpat/libexpat/archive/624da0f593bb8d7e146b9f42b06d8e6c80d032a3.tar.gz",
+        strip_prefix = "libexpat-624da0f593bb8d7e146b9f42b06d8e6c80d032a3",
     )
 
     nested_repository(
