@@ -111,6 +111,12 @@ bool ValdiRuntimeTweaks::disableJsLogging() const {
     return _tweakValueProvider->getBool(configKey, false);
 }
 
+bool ValdiRuntimeTweaks::enableRenderRequestContextFix() const {
+    auto configKey =
+        StringCache::getGlobal().makeStringFromLiteral(std::string_view("VALDI_ENABLE_RENDER_REQUEST_CONTEXT_FIX"));
+    return _tweakValueProvider->getBool(configKey, true);
+}
+
 bool ValdiRuntimeTweaks::disableHitTestSyncDeadline() const {
     return getConfigKey("VALDI_DISABLE_HIT_TEST_SYNC_DEADLINE");
 }

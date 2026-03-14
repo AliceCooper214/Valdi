@@ -56,6 +56,7 @@ private:
     std::atomic_int _callSequence;
     StringBox _functionName;
     MainThreadManager* _mainThreadManager;
+    Weak<Context> _creationContext;
     bool _shouldBlockMainThread = false;
     bool _ignoreIfValdiContextIsDestroyed = false;
     bool _isSingleCall;

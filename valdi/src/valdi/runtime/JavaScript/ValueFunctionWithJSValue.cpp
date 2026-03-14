@@ -12,6 +12,7 @@
 #include "valdi/runtime/JavaScript/JavaScriptTaskScheduler.hpp"
 #include "valdi/runtime/JavaScript/JavaScriptUtils.hpp"
 #include "valdi/runtime/Utils/MainThreadManager.hpp"
+#include "valdi_core/cpp/Utils/LoggerUtils.hpp"
 #include "valdi_core/cpp/Utils/ResolvablePromise.hpp"
 #include "valdi_core/cpp/Utils/SmallVector.hpp"
 #include "valdi_core/cpp/Utils/Trace.hpp"
@@ -31,6 +32,7 @@ ValueFunctionWithJSValue::ValueFunctionWithJSValue(IJavaScriptContext& context,
     : JSValueRefHolder(context, value, referenceInfo, exceptionTracker, true),
       _callSequence(0),
       _mainThreadManager(context.getListener() != nullptr ? context.getListener()->getMainThreadManager() : nullptr),
+      _creationContext(weakRef(Context::current())),
       _isSingleCall(isSingleCall) {}
 
 // See explanation in JSValueRefHolder.cpp
@@ -197,8 +199,23 @@ Value ValueFunctionWithJSValue::operator()(const ValueFunctionCallContext& callC
     if (taskScheduler == nullptr) {
         return Value::undefined();
     }
-    if (_ignoreIfValdiContextIsDestroyed && getContext()->isDestroyed()) {
-        return Value::undefined();
+    if (_ignoreIfValdiContextIsDestroyed) {
+        if (Context::isDestroyedContextFixEnabled()) {
+            auto ctx = _creationContext.lock();
+            if (ctx == nullptr || ctx->isDestroyed()) {
+                VALDI_WARN(getContext()->getLogger(),
+                           "Function call skipped: creation context {} is destroyed (function: {})",
+                           ctx != nullptr ? std::to_string(ctx->getContextId()) : "expired",
+                           getReferenceInfo().toString());
+                return Value::undefined();
+            }
+        } else if (getContext()->isDestroyed()) {
+            VALDI_WARN(getContext()->getLogger(),
+                       "Function call skipped: ValdiContext {} is destroyed (function: {})",
+                       getContext()->getContextId(),
+                       getReferenceInfo().toString());
+            return Value::undefined();
+        }
     }
 
     auto flags = callContext.getFlags();

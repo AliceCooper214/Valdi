@@ -464,6 +464,10 @@ Result<Void> JavaScriptRuntime::initializeContext() {
         runtimeTweaks = _listener->getRuntimeTweaks();
     }
 
+    if (runtimeTweaks != nullptr) {
+        Context::setDestroyedContextFixEnabled(runtimeTweaks->enableRenderRequestContextFix());
+    }
+
     VALDI_INFO(*_logger, "Creating JSContext from engine '{}'", _javaScriptBridge.getName());
 
     auto jsContext = _javaScriptBridge.createJsContext(this, *_logger);
@@ -757,10 +761,16 @@ JSValueRef JavaScriptRuntime::runtimeCreateContext(JSFunctionNativeCallContext& 
     auto callerContextId = static_cast<int32_t>(callerContextRef->getContextId());
     auto newContextId = static_cast<int32_t>(context->getContextId());
     if (context->getParent() == nullptr && callerContextId != 1 /* Ignore root context */) {
-        VALDI_DEBUG(*_logger, "Setting context {}'s parent context to {}", newContextId, callerContextId);
-
-        context->setParent(callerContextRef);
-        callerContextRef->getRoot()->retainDisposables();
+        if (callerContextRef->getRoot()->isDestroyed() && Context::isDestroyedContextFixEnabled()) {
+            VALDI_WARN(*_logger,
+                       "Skipping destroyed caller root context {} when creating context {}",
+                       callerContextRef->getRoot()->getContextId(),
+                       newContextId);
+        } else {
+            VALDI_DEBUG(*_logger, "Setting context {}'s parent context to {}", newContextId, callerContextId);
+            context->setParent(callerContextRef);
+            callerContextRef->getRoot()->retainDisposables();
+        }
     }
 
     return callContext.getContext().newNumber(newContextId);
@@ -871,6 +881,47 @@ JSValueRef JavaScriptRuntime::runtimeSubmitRenderRequest(JSFunctionNativeCallCon
     CHECK_CALL_CONTEXT(callContext);
     auto callback = callContext.getParameterAsFunction(1);
     CHECK_CALL_CONTEXT(callContext);
+
+    // When a JS callback (eg. a promise then()) runs under a dispatch whose owning
+    // context has been destroyed (eg. dismissed modal component), Context::currentRoot
+    // still points to that destroyed context.
+    //
+    // Any setState/onRender triggered from that JS callback will serialize function
+    // attributes (onTap, etc.) into the render request, and the JS-to-native bridge creation
+    // here captures Context::currentRoot (the destroyed context) as the bridge's owner.
+    //
+    // Bridges bound to a destroyed context drop all calls, commonly manifesting as UI
+    // components that "reject tap input" because OnTap etc won't work with destroyed contexts.
+    //
+    // Fix: Before deserializing, check for a destroyed root and temporarily override
+    // Context::current with the render request's target tree context (which is valid).
+    // This ensures bridges are bound to the correct, living context.
+    //
+    // Gated by COF VALDI_ENABLE_RENDER_REQUEST_CONTEXT_FIX (default: on)
+    std::unique_ptr<ContextEntry> contextOverride;
+    auto* currentRoot = Context::currentRoot();
+    if (currentRoot != nullptr && currentRoot->isDestroyed() && Context::isDestroyedContextFixEnabled()) {
+        auto& jsContext = callContext.getContext();
+        auto treeIdValue = jsContext.getObjectProperty(rawRequest, std::string_view("treeId"), exceptionTracker);
+        CHECK_CALL_CONTEXT(callContext);
+        auto treeId = static_cast<ContextId>(jsContext.valueToInt(treeIdValue.get(), exceptionTracker));
+        CHECK_CALL_CONTEXT(callContext);
+        auto treeContext = _contextManager.getContext(treeId);
+        if (treeContext != nullptr && !treeContext->isDestroyed()) {
+            VALDI_INFO(*_logger,
+                       "Render request context fix: overriding destroyed currentRoot={} with treeCtx={}",
+                       currentRoot->getContextId(),
+                       treeId);
+            contextOverride = std::make_unique<ContextEntry>(treeContext);
+        } else {
+            VALDI_WARN(*_logger,
+                       "Render request context fix: destroyed currentRoot={} but tree context {} is {}",
+                       currentRoot->getContextId(),
+                       treeId,
+                       treeContext == nullptr ? "null" : "also destroyed");
+        }
+    }
+
     auto renderRequest = _runtimeDeserializers->deserializeRenderRequest(rawRequest, referenceInfo, exceptionTracker);
     if (exceptionTracker && _listener != nullptr) {
         _listener->receivedRenderRequest(renderRequest);
@@ -3766,7 +3817,6 @@ void JavaScriptRuntime::handleUncaughtJsErrorNoHandler(const Ref<Context>& owner
 const Ref<Metrics>& JavaScriptRuntime::getMetrics() const {
     return _resourceManager.getMetrics();
 }
-
 
 void JavaScriptRuntime::startProfiling() {
     dispatchOnJsThreadUnattributed([](JavaScriptEntryParameters& entry) { entry.jsContext.startProfiling(); });
