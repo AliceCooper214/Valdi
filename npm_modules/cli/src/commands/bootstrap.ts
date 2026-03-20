@@ -231,7 +231,6 @@ function initializeConfigFiles(
     TemplateFile.init(TEMPLATE_BASE_PATHS.GIT_IGNORE),
     TemplateFile.init(TEMPLATE_BASE_PATHS.WATCHMAN_CONFIG),
     TemplateFile.init(TEMPLATE_BASE_PATHS.EDITOR_CONFIG),
-    TemplateFile.init(TEMPLATE_BASE_PATHS.CURSOR_RULES),
     TemplateFile.init(TEMPLATE_BASE_PATHS.AGENTS).withReplacements({ MODULE_NAME: projectName }),
   ];
 
@@ -252,22 +251,6 @@ function initializeConfigFiles(
     console.log(wrapInColor('Creating GitHub templates...', ANSI_COLORS.YELLOW_COLOR));
     const githubDestPath = path.join(process.cwd(), '.github');
     copyBootstrapFiles(githubSourcePath, githubDestPath, replacements);
-  }
-
-  // Copy .cursor rules directory (if it exists)
-  const cursorSourcePath = path.join(META_DIR_PATH, '.cursor');
-  if (fileExists(cursorSourcePath)) {
-    console.log(wrapInColor('Creating Cursor AI rules...', ANSI_COLORS.YELLOW_COLOR));
-    const cursorDestPath = path.join(process.cwd(), '.cursor');
-    copyBootstrapFiles(cursorSourcePath, cursorDestPath, replacements);
-  }
-
-  // Copy .claude skills directory (if it exists)
-  const claudeSourcePath = path.join(META_DIR_PATH, '.claude');
-  if (fileExists(claudeSourcePath)) {
-    console.log(wrapInColor('Creating Claude Code skills...', ANSI_COLORS.YELLOW_COLOR));
-    const claudeDestPath = path.join(process.cwd(), '.claude');
-    copyBootstrapFiles(claudeSourcePath, claudeDestPath, replacements);
   }
 
   // Setup hello world application

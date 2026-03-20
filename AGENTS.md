@@ -599,6 +599,20 @@ For more details on specific topics, see the `/docs/` directory:
 - Advanced features (animations, gestures, protobuf)
 - Native bindings and custom views
 
+## AI Skills (Context for AI Agents)
+
+The Valdi CLI ships context files ("skills") that give AI agents accurate knowledge about Valdi APIs, patterns, and conventions. Install them once to reduce hallucinations:
+
+```bash
+npm install -g @snap/valdi
+valdi skills install          # installs all skills for detected AI agents
+# or install by category:
+valdi skills install --category=client     # module development skills
+valdi skills install --category=framework  # framework internals skills
+```
+
+Skills are bundled inside the npm package — no network access required after install.
+
 ## Contributing
 
 This is an open-source project. When contributing:

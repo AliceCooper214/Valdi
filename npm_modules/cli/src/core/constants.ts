@@ -42,7 +42,6 @@ export enum TEMPLATE_BASE_PATHS {
   WATCHMAN_CONFIG = '.watchmanconfig.template',
   GIT_IGNORE = '.gitignore.template',
   EDITOR_CONFIG = '.editorconfig.template',
-  CURSOR_RULES = '.cursorrules.template',
   AGENTS = 'AGENTS.md.template',
 }
 
