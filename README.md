@@ -4,7 +4,7 @@
 [![Platforms](https://img.shields.io/badge/platform-iOS%20%7C%20Android%20%7C%20macOS-lightgrey)](./docs/INSTALL.md)
 [![Status](https://img.shields.io/badge/status-beta-yellow)]()
 [![Discord](https://img.shields.io/discord/1285677307163574322?color=7289da&label=Discord&logo=discord&logoColor=white)](https://discord.gg/uJyNEeYX2U)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.x-blue?logo=typescript)](https://www.typescriptlang.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.3-blue?logo=typescript)](https://www.typescriptlang.org/)
 [![Documentation](https://img.shields.io/badge/docs-available-brightgreen)](./docs/README.md)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](./CONTRIBUTING.md)
 
@@ -132,6 +132,7 @@ Valdi generates type-safe bindings between TypeScript and native platforms:
 - **[Advanced gesture recognition](./docs/docs/core-touches.md)** with platform-native handling
 - **[Built-in testing framework](./docs/docs/workflow-testing.md)** with component-level unit tests
 - **[Bazel integration](./docs/docs/workflow-bazel.md)** for reproducible, incremental builds
+
 
 ## Need Help?
 
