@@ -356,6 +356,7 @@ def _invoke_valdi_compiler(ctx, module_name, module_yaml):
     module_upload_base_url = ctx.var.get("module_upload_base_url")
     enable_web = ctx.var.get("enable_web")
     disable_minify_web = ctx.var.get("disable_minify_web", False)
+    worker_protocol = ctx.var.get("valdi_worker_protocol", "json")
 
     #############
     # 1. Generate the project config file that is currently required by the Valdi compiler.
@@ -407,6 +408,7 @@ def _invoke_valdi_compiler(ctx, module_name, module_yaml):
         mnemonic = "ValdiCompile",
         progress_message = "Compiling Valdi module: " + str(ctx.label),
         use_worker = True,
+        worker_protocol = worker_protocol,
     )
 
     return outputs
