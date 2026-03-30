@@ -285,6 +285,9 @@ class JSXModule implements IDaemonClientManagerListener, RendererFactory {
       if (this.currentPlatform === 3) {
         if (macosClass) {
           return new NodePrototype(className, macosClass, attributes);
+        } else if (iosClass) {
+          // macOS falls through to iOS class names
+          return new NodePrototype(className, iosClass, attributes);
         } else {
           return new DeferredNodePrototype(className, attributes);
         }
@@ -329,7 +332,8 @@ class JSXModule implements IDaemonClientManagerListener, RendererFactory {
 
   registerNativeElement(className: string, iosClass: string, androidClass: string): void {
     let viewClassName: string;
-    if (this.currentPlatform === 2) {
+    if (this.currentPlatform === 2 || this.currentPlatform === 3) {
+      // macOS (3) falls through to iOS class names
       viewClassName = iosClass;
     } else if (this.currentPlatform === 1) {
       viewClassName = androidClass;

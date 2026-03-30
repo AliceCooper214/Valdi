@@ -1269,8 +1269,13 @@ void ViewNode::setViewFactory(ViewTransactionScope& viewTransactionScope, const 
 void ViewNode::setViewClassNameForPlatform(ViewTransactionScope& viewTransactionScope,
                                            const StringBox& viewClassName,
                                            PlatformType platformType) {
-    if (_viewNodeTree->getViewManagerContext()->getViewManager().getPlatformType() != platformType) {
-        return;
+    auto currentPlatformType = _viewNodeTree->getViewManagerContext()->getViewManager().getPlatformType();
+    if (currentPlatformType != platformType) {
+        // macOS falls through to iOS class names (iosClass is bound before macosClass,
+        // so macosClass will overwrite if explicitly set)
+        if (!(currentPlatformType == PlatformTypeMacOS && platformType == PlatformTypeIOS)) {
+            return;
+        }
     }
 
     if (viewClassName.isEmpty()) {

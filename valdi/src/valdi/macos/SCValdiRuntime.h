@@ -22,6 +22,8 @@ typedef struct SnapDrawingRuntime SnapDrawingRuntime;
  * This should be `NO` for any release build where cache permanence is desired, but it comes at the cost of the user
  * seeing a privacy prompt for accessing their documents directory.
  */
+- (instancetype)initWithUsingTemporaryCachesDirectory:(BOOL)usingTemporaryCachesDirectory
+                                      useHermesEngine:(BOOL)useHermesEngine;
 - (instancetype)initWithUsingTemporaryCachesDirectory:(BOOL)usingTemporaryCachesDirectory;
 - (instancetype)init NS_UNAVAILABLE;
 
@@ -35,11 +37,12 @@ typedef struct SnapDrawingRuntime SnapDrawingRuntime;
 - (void)registerModuleFactoriesProvider:(ModuleFactoriesProviderSharedPtr*)moduleFactoriesProvider;
 - (void)setDisplayScale:(double)displayScale;
 
-/// Creates a ViewFactory for a SnapDrawing layer class by name (e.g. @"SCFilePickerView"). Use for desktop so the view is a layer, not a bridged NSView.
-- (id)makeViewFactoryForSnapDrawingLayerClass:(NSString *)className;
+/// Creates a ViewFactory for a SnapDrawing layer class by name (e.g. @"SCFilePickerView"). Use for desktop so the view
+/// is a layer, not a bridged NSView.
+- (id)makeViewFactoryForSnapDrawingLayerClass:(NSString*)className;
 
 /// Returns the SnapDrawing view manager pointer (opaque). Use to register module layer classes (e.g. valdi_polyglot).
-- (void *)snapDrawingViewManager;
+- (void*)snapDrawingViewManager;
 
 + (NSArray<NSString*>*)getLaunchArguments;
 

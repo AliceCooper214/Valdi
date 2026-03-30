@@ -1,23 +1,21 @@
-import { getWebViewClassFactory } from '../WebViewClassRegistry';
+import { getWebViewClassFactory, WebViewClassAttributeHandler } from '../WebViewClassRegistry';
 import { WebValdiView } from './WebValdiView';
 
 /**
  * Web implementation of <custom-view>.
  * Resolves webClass via WebViewClassRegistry and runs the registered factory.
- * If no factory is registered, shows a placeholder.
+ * The factory can optionally return an object with a changeAttribute method
+ * to receive attribute updates.
  */
 export class WebValdiCustomView extends WebValdiView {
   public override type = 'custom-view';
 
   private _webClassApplied = false;
-  private _fallbackScheduled = false;
+  private _attributeHandler?: WebViewClassAttributeHandler;
+  private _pendingAttributes: Array<[string, unknown]> = [];
 
   override changeAttribute(attributeName: string, attributeValue: unknown): void {
-    // WARNING: console.log can be replaced during Init in the web runtime.
-    // Also, custom-view attributes arrive in batches, so this method sees intermediate states.
-    // If you need debugging here, use __valdiLogToConsole__ and account for partial updates.
     if (attributeName === 'androidClass' || attributeName === 'iosClass' || attributeName === 'macosClass') {
-      // Native-only class selectors are expected on custom-view, but ignored on web.
       return;
     }
     if (attributeName === 'webClass') {
@@ -26,7 +24,15 @@ export class WebValdiCustomView extends WebValdiView {
         const factory = getWebViewClassFactory(attributeValue);
         if (factory) {
           this.htmlElement.replaceChildren();
-          factory(this.htmlElement);
+          const result = factory(this.htmlElement);
+          if (result) {
+            this._attributeHandler = result;
+          }
+          // Flush pending attributes
+          for (const [name, value] of this._pendingAttributes) {
+            this._attributeHandler?.changeAttribute(name, value);
+          }
+          this._pendingAttributes = [];
         } else {
           this.appendPlaceholder(attributeValue);
         }
@@ -36,19 +42,19 @@ export class WebValdiCustomView extends WebValdiView {
       }
       return;
     }
-    if (!this._webClassApplied && !this._fallbackScheduled) {
-      this._fallbackScheduled = true;
-      // Delay so webClass can arrive in a later attribute batch.
-      setTimeout(() => {
-        if (!this._webClassApplied && this.htmlElement.childNodes.length === 0) {
-          this.appendPlaceholder('(no webClass)');
-          if (!this.htmlElement.style.minHeight) {
-            this.htmlElement.style.minHeight = '80px';
-          }
-        }
-      }, 150);
+
+    // Try known layout/view attributes first via super
+    try {
+      super.changeAttribute(attributeName, attributeValue);
+    } catch {
+      // Unknown attribute — forward to the custom view's attribute handler
+      if (this._attributeHandler) {
+        this._attributeHandler.changeAttribute(attributeName, attributeValue);
+      } else if (!this._webClassApplied) {
+        // webClass hasn't arrived yet; buffer the attribute
+        this._pendingAttributes.push([attributeName, attributeValue]);
+      }
     }
-    super.changeAttribute(attributeName, attributeValue);
   }
 
   private appendPlaceholder(message: string): void {

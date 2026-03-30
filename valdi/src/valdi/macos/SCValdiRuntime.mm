@@ -75,6 +75,12 @@ public:
 
 - (instancetype)initWithUsingTemporaryCachesDirectory:(BOOL)usingTemporaryCachesDirectory
 {
+    return [self initWithUsingTemporaryCachesDirectory:usingTemporaryCachesDirectory useHermesEngine:NO];
+}
+
+- (instancetype)initWithUsingTemporaryCachesDirectory:(BOOL)usingTemporaryCachesDirectory
+                                     useHermesEngine:(BOOL)useHermesEngine
+{
     self = [super init];
 
     if (self) {
@@ -102,11 +108,11 @@ public:
         _macOSViewManager = std::make_unique<ValdiMacOS::ViewManager>();
 
         _runtimeManager = Valdi::makeShared<Valdi::RuntimeManager>(_mainThreadDispatcher,
-                                                                               Valdi::JavaScriptBridge::get(snap::valdi_core::JavaScriptEngineType::QuickJS),
+                                                                               Valdi::JavaScriptBridge::get(useHermesEngine ? snap::valdi_core::JavaScriptEngineType::Hermes : snap::valdi_core::JavaScriptEngineType::QuickJS),
                                                                                documentsDiskCache,
                                                                                nullptr,
                                                                                nullptr,
-                                                                               Valdi::PlatformTypeIOS,
+                                                                               Valdi::PlatformTypeMacOS,
                                                                                Valdi::ThreadQoSClassMax,
                                                                                Valdi::strongSmallRef(&Valdi::ConsoleLogger::getLogger()),
                                                                                /* enableDebuggerService */ true,

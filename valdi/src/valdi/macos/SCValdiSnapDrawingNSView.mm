@@ -307,15 +307,18 @@
 
 - (NSView *)hitTest:(NSPoint)point
 {
-    // Accept all hits within our bounds so we receive mouse events for layer touch handling.
-    // Subviews (e.g. surface presenter) may return nil to pass through; we still need to get the event.
-    // Point is in superview's coordinate system.
-    NSPoint localPoint = [self convertPoint:point fromView:self.superview];
-    BOOL inBounds = NSPointInRect(localPoint, self.bounds);
-    if (inBounds) {
-        return self;
+    NSView *view = [super hitTest:point];
+    if (view == nil) {
+        return nil;
     }
-    return [super hitTest:point];
+    // If the hit landed on a native embedded view (e.g. NSDatePicker, NSPopUpButton),
+    // return it directly so it receives real NSWindow-dispatched mouse events.
+    // Synthetic event forwarding via BridgeGestureRecognizer doesn't work for controls
+    // that need full AppKit event loop integration.
+    if (view != self) {
+        return view;
+    }
+    return self;
 }
 
 - (void)mouseDown:(NSEvent *)event

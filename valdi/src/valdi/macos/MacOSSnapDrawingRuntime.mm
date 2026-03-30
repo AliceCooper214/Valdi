@@ -22,7 +22,7 @@ MacOSSnapDrawingRuntime::MacOSSnapDrawingRuntime(const Valdi::Ref<Valdi::IDiskCa
                                                  uint64_t maxCacheSizeInBytes):
 snap::drawing::Runtime(Valdi::makeShared<snap::drawing::CVDisplayLinkFrameScheduler>(logger), snap::drawing::GesturesConfiguration::getDefault(), diskCache, &hostViewManager, logger, workerQueue, maxCacheSizeInBytes) {
 
-    initializeViewManager(Valdi::PlatformTypeIOS);
+    initializeViewManager(Valdi::PlatformTypeMacOS);
 
     id<MTLDevice> device = MTLCreateSystemDefaultDevice();
     id<MTLCommandQueue> commandQueue = [device newCommandQueue];
